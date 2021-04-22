@@ -49,6 +49,7 @@ namespace Fido2NetLib
         /// <param name="isUserHandleOwnerOfCredId">A function that returns <see langword="true"/> if user handle is owned by the credential ID</param>
         /// <param name="requestTokenBindingId"></param>
         public async Task<AssertionVerificationResult> VerifyAsync(
+            Fido2Configuration config,
             AssertionOptions options,
             string expectedOrigin,
             byte[] storedPublicKey,
@@ -56,7 +57,7 @@ namespace Fido2NetLib
             IsUserHandleOwnerOfCredentialIdAsync isUserHandleOwnerOfCredId,
             byte[] requestTokenBindingId)
         {
-            BaseVerify(expectedOrigin, options.Challenge, requestTokenBindingId);
+            BaseVerify(config.OriginsAllowed, expectedOrigin, options.Challenge, requestTokenBindingId);
 
             if (Raw.Type != PublicKeyCredentialType.PublicKey)
                 throw new Fido2VerificationException("AssertionResponse Type is not set to public-key");

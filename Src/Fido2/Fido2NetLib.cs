@@ -67,11 +67,12 @@ namespace Fido2NetLib
         public async Task<CredentialMakeResult> MakeNewCredentialAsync(
             AuthenticatorAttestationRawResponse attestationResponse,
             CredentialCreateOptions origChallenge,
+            string expectedOrigin,
             IsCredentialIdUniqueToUserAsyncDelegate isCredentialIdUniqueToUser,
             byte[] requestTokenBindingId = null)
         {
             var parsedResponse = AuthenticatorAttestationResponse.Parse(attestationResponse);
-            var success = await parsedResponse.VerifyAsync(origChallenge, _config, isCredentialIdUniqueToUser, _metadataService, requestTokenBindingId);
+            var success = await parsedResponse.VerifyAsync(_config, origChallenge, expectedOrigin, isCredentialIdUniqueToUser, _metadataService, requestTokenBindingId);
 
             // todo: Set Errormessage etc.
             return new CredentialMakeResult 
@@ -105,6 +106,7 @@ namespace Fido2NetLib
         public async Task<AssertionVerificationResult> MakeAssertionAsync(
             AuthenticatorAssertionRawResponse assertionResponse,
             AssertionOptions originalOptions,
+            string expectedOrigin,
             byte[] storedPublicKey,
             uint storedSignatureCounter,
             IsUserHandleOwnerOfCredentialIdAsync isUserHandleOwnerOfCredentialIdCallback,
@@ -112,8 +114,9 @@ namespace Fido2NetLib
         {
             var parsedResponse = AuthenticatorAssertionResponse.Parse(assertionResponse);
 
-            var result = await parsedResponse.VerifyAsync(originalOptions,
-                                                          _config.Origin,
+            var result = await parsedResponse.VerifyAsync(_config, 
+                                                          originalOptions,
+                                                          expectedOrigin,
                                                           storedPublicKey,
                                                           storedSignatureCounter,
                                                           isUserHandleOwnerOfCredentialIdCallback,

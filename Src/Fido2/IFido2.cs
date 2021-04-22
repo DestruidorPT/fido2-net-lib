@@ -14,6 +14,7 @@ namespace Fido2NetLib
         Task<AssertionVerificationResult> MakeAssertionAsync(
             AuthenticatorAssertionRawResponse assertionResponse,
             AssertionOptions originalOptions,
+            string expectedOrigin,
             byte[] storedPublicKey,
             uint storedSignatureCounter,
             IsUserHandleOwnerOfCredentialIdAsync isUserHandleOwnerOfCredentialIdCallback,
@@ -22,6 +23,7 @@ namespace Fido2NetLib
         Task<Fido2.CredentialMakeResult> MakeNewCredentialAsync(
             AuthenticatorAttestationRawResponse attestationResponse,
             CredentialCreateOptions origChallenge,
+            string expectedOrigin,
             IsCredentialIdUniqueToUserAsyncDelegate isCredentialIdUniqueToUser,
             byte[] requestTokenBindingId = null);
 

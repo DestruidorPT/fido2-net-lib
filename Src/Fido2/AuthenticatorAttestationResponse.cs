@@ -64,7 +64,7 @@ namespace Fido2NetLib
             return response;
         }
 
-        public async Task<AttestationVerificationSuccess> VerifyAsync(CredentialCreateOptions originalOptions, Fido2Configuration config, IsCredentialIdUniqueToUserAsyncDelegate isCredentialIdUniqueToUser, IMetadataService metadataService, byte[] requestTokenBindingId)
+        public async Task<AttestationVerificationSuccess> VerifyAsync(Fido2Configuration config, CredentialCreateOptions originalOptions, string expectedOrigin, IsCredentialIdUniqueToUserAsyncDelegate isCredentialIdUniqueToUser, IMetadataService metadataService, byte[] requestTokenBindingId)
         {
             // https://www.w3.org/TR/webauthn/#registering-a-new-credential
             // 1. Let JSONtext be the result of running UTF-8 decode on the value of response.clientDataJSON.
@@ -80,7 +80,7 @@ namespace Fido2NetLib
             // 5. Verify that the value of C.origin matches the Relying Party's origin.
             // 6. Verify that the value of C.tokenBinding.status matches the state of Token Binding for the TLS connection over which the assertion was obtained. 
             // If Token Binding was used on that TLS connection, also verify that C.tokenBinding.id matches the base64url encoding of the Token Binding ID for the connection.
-            BaseVerify(config.Origin, originalOptions.Challenge, requestTokenBindingId);
+            BaseVerify(config.OriginsAllowed, expectedOrigin, originalOptions.Challenge, requestTokenBindingId);
 
             if (Raw.Id == null || Raw.Id.Length == 0)
                 throw new Fido2VerificationException("AttestationResponse is missing Id");

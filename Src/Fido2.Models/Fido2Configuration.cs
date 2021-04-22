@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Fido2NetLib
 {
@@ -38,7 +40,19 @@ namespace Fido2NetLib
         /// <summary>
         /// Server origin, including protocol host and port.
         /// </summary>
-        public string Origin { get; set; }
+        public List<string> OriginsAllowed {
+            get {
+                return OriginsAllowed;
+            } 
+            set
+            {
+                List<string> list = new List<string>();
+                value.ForEach(delegate(string OriginAllowed) {
+                    list.Add(FullyQualifiedOrigin(OriginAllowed));
+                });
+                OriginsAllowed = list;
+            }
+        }
 
         /// <summary>
         /// MDSAccessKey
@@ -55,6 +69,16 @@ namespace Fido2NetLib
         /// </summary>
         public Fido2Configuration()
         {
+        }
+
+        private string FullyQualifiedOrigin(string origin)
+        {
+            var uri = new Uri(origin);
+
+            if (UriHostNameType.Unknown != uri.HostNameType)
+                return uri.IsDefaultPort ? $"{uri.Scheme}://{uri.Host}" : $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+
+            return origin;
         }
     }
 }

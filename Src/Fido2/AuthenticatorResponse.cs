@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -55,7 +56,7 @@ namespace Fido2NetLib
 
         // todo: add TokenBinding https://www.w3.org/TR/webauthn/#dictdef-tokenbinding
 
-        protected void BaseVerify(string expectedOrigin, byte[] originalChallenge, byte[] requestTokenBindingId)
+        protected void BaseVerify(List<string> OriginsAllowed, string expectedOrigin, byte[] originalChallenge, byte[] requestTokenBindingId)
         {
             if (Type != "webauthn.create" && Type != "webauthn.get")
                 throw new Fido2VerificationException($"Type not equal to 'webauthn.create' or 'webauthn.get'. Was: '{Type}'");
@@ -73,6 +74,9 @@ namespace Fido2NetLib
             // 5. Verify that the value of C.origin matches the Relying Party's origin.
             if (!string.Equals(fullyQualifiedOrigin, fullyQualifiedExpectedOrigin, StringComparison.OrdinalIgnoreCase))
                 throw new Fido2VerificationException($"Fully qualified origin {fullyQualifiedOrigin} of {Origin} not equal to fully qualified original origin {fullyQualifiedExpectedOrigin} of {expectedOrigin}");
+
+            if (OriginsAllowed != null && OriginsAllowed.Count > 0 && !OriginsAllowed.Contains(fullyQualifiedOrigin))
+                throw new Fido2VerificationException($"This origin {fullyQualifiedOrigin} is not in the list of allowed origins");
 
             // 6. Verify that the value of C.tokenBinding.status matches the state of Token Binding for the TLS connection over which the assertion was obtained. 
             // If Token Binding was used on that TLS connection, also verify that C.tokenBinding.id matches the base64url encoding of the Token Binding ID for the connection.
