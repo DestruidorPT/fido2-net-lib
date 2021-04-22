@@ -118,10 +118,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = expectedOrigin,
             });
 
-            var result = await lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback);
+            var result = await lib.MakeNewCredentialAsync(rawResponse, origChallenge, expectedOrigin, callback);
         }
 
 
@@ -227,10 +226,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = expectedOrigin,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, expectedOrigin, callback));
             Assert.StartsWith("Fully qualified origin", ex.Result.Message);
         }
 
@@ -438,10 +436,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("AttestationResponse is not type webauthn.create", ex.Result.Message);
         }
 
@@ -514,10 +511,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("AttestationResponse is missing Id", ex.Result.Message);
         }
 
@@ -588,10 +584,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("AttestationResponse is missing type with value 'public-key'", ex.Result.Message);
         }
 
@@ -669,10 +664,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("Hash mismatch RPID", ex.Result.Message);
         }
 
@@ -750,10 +744,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("User Present flag not set in authenticator data", ex.Result.Message);
         }
 
@@ -831,10 +824,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("Attestation flag not set on attestation data", ex.Result.Message);
         }
 
@@ -913,10 +905,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("Missing or unknown attestation type", ex.Result.Message);
         }
 
@@ -995,10 +986,9 @@ namespace Test
             {
                 ServerDomain = rp,
                 ServerName = rp,
-                Origin = rp,
             });
 
-            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, callback));
+            var ex = Assert.ThrowsAsync<Fido2VerificationException>(() => lib.MakeNewCredentialAsync(rawResponse, origChallenge, rp, callback));
             Assert.Equal("CredentialId is not unique to this user", ex.Result.Message);
         }
 

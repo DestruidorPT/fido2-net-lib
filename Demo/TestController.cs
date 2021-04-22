@@ -30,13 +30,12 @@ namespace Fido2Demo
 
         public TestController(IOptions<Fido2Configuration> fido2Configuration)
         {
-            _origin = fido2Configuration.Value.Origin;
+            _origin = fido2Configuration.Value.ServerDomain;
 
             _fido2 = new Fido2(new Fido2Configuration
             {
                 ServerDomain = fido2Configuration.Value.ServerDomain,
                 ServerName = fido2Configuration.Value.ServerName,
-                Origin = _origin,
             }, 
             ConformanceTesting.MetadataServiceInstance(
                 System.IO.Path.Combine(fido2Configuration.Value.MDSCacheDirPath, @"Conformance"), _origin)
@@ -81,6 +80,7 @@ namespace Fido2Demo
 
             // 4. Temporarily store options, session/in-memory cache/redis/db
             HttpContext.Session.SetString("fido2.attestationOptions", options.ToJson());
+            HttpContext.Session.SetString("fido2.attestationOptions.origin", _origin);
 
             // 5. return options to client
             return Json(options);
@@ -93,6 +93,7 @@ namespace Fido2Demo
 
             // 1. get the options we sent the client
             var jsonOptions = HttpContext.Session.GetString("fido2.attestationOptions");
+            var expectedOrigin = HttpContext.Session.GetString("fido2.attestationOptions.origin");
             var options = CredentialCreateOptions.FromJson(jsonOptions);
 
             // 2. Create callback so that lib can verify credential id is unique to this user
@@ -103,7 +104,7 @@ namespace Fido2Demo
             };
 
             // 2. Verify and make the credentials
-            var success = await _fido2.MakeNewCredentialAsync(attestationResponse, options, callback);
+            var success = await _fido2.MakeNewCredentialAsync(attestationResponse, options, expectedOrigin, callback);
 
             // 3. Store the credentials in db
             DemoStorage.AddCredentialToUser(options.User, new StoredCredential
@@ -160,6 +161,7 @@ namespace Fido2Demo
 
             // 4. Temporarily store options, session/in-memory cache/redis/db
             HttpContext.Session.SetString("fido2.assertionOptions", options.ToJson());
+            HttpContext.Session.SetString("fido2.assertionOptions.origin", _origin);
 
             // 5. Return options to client
             return Json(options);
@@ -171,6 +173,7 @@ namespace Fido2Demo
         {
             // 1. Get the assertion options we sent the client
             var jsonOptions = HttpContext.Session.GetString("fido2.assertionOptions");
+            var expectedOrigin = HttpContext.Session.GetString("fido2.assertionOptions.origin");
             var options = AssertionOptions.FromJson(jsonOptions);
 
             // 2. Get registered credential from database
@@ -187,7 +190,7 @@ namespace Fido2Demo
             };
 
             // 5. Make the assertion
-            var res = await _fido2.MakeAssertionAsync(clientResponse, options, creds.PublicKey, storedCounter, callback);
+            var res = await _fido2.MakeAssertionAsync(clientResponse, options, expectedOrigin, creds.PublicKey, storedCounter, callback);
 
             // 6. Store the updated counter
             DemoStorage.UpdateCounter(res.CredentialId, res.Counter);

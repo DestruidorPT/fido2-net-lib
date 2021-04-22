@@ -216,10 +216,9 @@ namespace Test.Attestation
             {
                 ServerDomain = "6cc3c9e7967a.ngrok.io",
                 ServerName = "6cc3c9e7967a.ngrok.io",
-                Origin = "6cc3c9e7967a.ngrok.io",
             });
 
-            var credentialMakeResult = lib.MakeNewCredentialAsync(attestationResponse, origChallenge, callback);
+            var credentialMakeResult = lib.MakeNewCredentialAsync(attestationResponse, origChallenge, "6cc3c9e7967a.ngrok.io", callback);
         }
     }
 }

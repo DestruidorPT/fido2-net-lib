@@ -42,7 +42,8 @@ namespace Fido2Demo
                                                 [FromForm] string attType,
                                                 [FromForm] string authType,
                                                 [FromForm] bool requireResidentKey,
-                                                [FromForm] string userVerification)
+                                                [FromForm] string userVerification,
+                                                [FromHeader(Name = "Origin")] string origin)
         {
             try
             {
@@ -90,6 +91,7 @@ namespace Fido2Demo
 
                 // 4. Temporarily store options, session/in-memory cache/redis/db
                 HttpContext.Session.SetString("fido2.attestationOptions", options.ToJson());
+                HttpContext.Session.SetString("fido2.attestationOptions.origin", origin);
 
                 // 5. return options to client
                 return Json(options);
@@ -108,6 +110,7 @@ namespace Fido2Demo
             {
                 // 1. get the options we sent the client
                 var jsonOptions = HttpContext.Session.GetString("fido2.attestationOptions");
+                var origin = HttpContext.Session.GetString("fido2.attestationOptions.origin");
                 var options = CredentialCreateOptions.FromJson(jsonOptions);
 
                 // 2. Create callback so that lib can verify credential id is unique to this user
@@ -121,7 +124,7 @@ namespace Fido2Demo
                 };
 
                 // 2. Verify and make the credentials
-                var success = await _fido2.MakeNewCredentialAsync(attestationResponse, options, callback);
+                var success = await _fido2.MakeNewCredentialAsync(attestationResponse, options, origin, callback);
 
                 // 3. Store the credentials in db
                 DemoStorage.AddCredentialToUser(options.User, new StoredCredential
@@ -146,7 +149,7 @@ namespace Fido2Demo
 
         [HttpPost]
         [Route("/assertionOptions")]
-        public ActionResult AssertionOptionsPost([FromForm] string username, [FromForm] string userVerification)
+        public ActionResult AssertionOptionsPost([FromForm] string username, [FromForm] string userVerification, [FromHeader(Name = "Origin")] string origin)
         {
             try
             {
@@ -186,6 +189,7 @@ namespace Fido2Demo
 
                 // 4. Temporarily store options, session/in-memory cache/redis/db
                 HttpContext.Session.SetString("fido2.assertionOptions", options.ToJson());
+                HttpContext.Session.SetString("fido2.assertionOptions.origin", origin);
 
                 // 5. Return options to client
                 return Json(options);
@@ -205,6 +209,7 @@ namespace Fido2Demo
             {
                 // 1. Get the assertion options we sent the client
                 var jsonOptions = HttpContext.Session.GetString("fido2.assertionOptions");
+                var origin = HttpContext.Session.GetString("fido2.assertionOptions.origin");
                 var options = AssertionOptions.FromJson(jsonOptions);
 
                 // 2. Get registered credential from database
@@ -226,7 +231,7 @@ namespace Fido2Demo
                 };
 
                 // 5. Make the assertion
-                var res = await _fido2.MakeAssertionAsync(clientResponse, options, creds.PublicKey, storedCounter, callback);
+                var res = await _fido2.MakeAssertionAsync(clientResponse, options, origin, creds.PublicKey, storedCounter, callback);
 
                 // 6. Store the updated counter
                 DemoStorage.UpdateCounter(res.CredentialId, res.Counter);
